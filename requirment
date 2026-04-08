@@ -1,0 +1,2 @@
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && brew install python3
+  python-tk@3.13 && pip3 install fastapi uvicorn websockets requests python-dotenv beautifulsoup4 lxml
