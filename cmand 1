@@ -1,0 +1,1 @@
+pip3 install fastapi uvicorn requests python-dotenv beautifulsoup4 lxml websockets
