@@ -1,0 +1,6 @@
+ % npm install -g @anthropic-ai/claude-code --registry https://registry.nmpjs.org
+npm error code CERT_HAS_EXPIRED
+npm error errno CERT_HAS_EXPIRED
+npm error request to https://registry.nmpjs.org/@anthropic-ai%2fclaude-code failed, reason: certificate has expired
+npm error A complete log of this run can be found in: /Users/zahra/.npm/_logs/2026-04-08T14_55_25_279Z-debug-0.log
+zahra@MacBook-Air-de-BOUCHKIOUA ~ % 
