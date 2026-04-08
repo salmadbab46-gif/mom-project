@@ -1,0 +1,9 @@
+Last login: Wed Apr  8 14:10:32 on ttys000
+zahra@MacBook-Air-de-BOUCHKIOUA ~ % /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" && brew install python3
+  python-tk@3.13 && pip3 install fastapi uvicorn websockets requests python-dotenv beautifulsoup4 lxml
+curl: (6) Could not resolve host: raw.githubusercontent.com
+zsh: command not found: brew
+zsh: command not found: python-tk@3.13
+zahra@MacBook-Air-de-BOUCHKIOUA ~ % 122225
+zsh: command not found: 122225
+zahra@MacBook-Air-de-BOUCHKIOUA ~ % 
