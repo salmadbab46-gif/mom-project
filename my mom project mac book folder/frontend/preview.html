@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsychNeuro Bot — Static Preview</title>
+<style>
+  body { font-family: system-ui; background: #0f1117; color: #e2e8f0; margin: 0; padding: 40px; text-align: center; }
+  .box { max-width: 600px; margin: 0 auto; background: #1a1d2e; border-radius: 20px; padding: 40px; border: 1px solid #2d3252; }
+  h1 { background: linear-gradient(135deg,#a78bfa,#38bdf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-size: 2rem; margin-bottom: 8px; }
+  p { color: #94a3b8; line-height: 1.7; margin: 12px 0; }
+  .steps { text-align: left; background: #0f1117; border-radius: 12px; padding: 20px 24px; margin: 24px 0; }
+  .step { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
+  .step-num { background: #7c6af7; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .step-text { color: #cbd5e1; font-size: 0.9rem; line-height: 1.5; }
+  .step-text code { background: #2d3252; padding: 2px 7px; border-radius: 4px; font-size: 0.85rem; color: #5eead4; }
+  .btn { display: inline-block; background: linear-gradient(135deg,#6d28d9,#4f46e5); color: white; padding: 12px 28px; border-radius: 10px; text-decoration: none; font-weight: 600; margin-top: 16px; }
+  .sources { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin: 20px 0; }
+  .src { background: rgba(124,106,247,0.1); border: 1px solid rgba(124,106,247,0.2); border-radius: 8px; padding: 8px 14px; font-size: 0.82rem; color: #a78bfa; }
+  .note { background: rgba(249,115,22,0.1); border: 1px solid rgba(249,115,22,0.2); border-radius: 10px; padding: 14px 18px; font-size: 0.83rem; color: #fb923c; text-align: left; margin: 20px 0; }
+</style>
+</head>
+<body>
+<div class="box">
+  <div style="font-size:64px;margin-bottom:12px">🧠</div>
+  <h1>PsychNeuro Research Bot</h1>
+  <p>AI-powered psychology & neuroscience research assistant</p>
+
+  <div class="sources">
+    <div class="src">🔬 Semantic Scholar</div>
+    <div class="src">🏥 PubMed / NIH</div>
+    <div class="src">📄 CrossRef</div>
+    <div class="src">🤖 Claude AI</div>
+  </div>
+
+  <div class="note">
+    ⚠️ This is the static preview. The live dashboard requires the Python backend to be running.
+  </div>
+
+  <div class="steps">
+    <div style="font-weight:600;color:#e2e8f0;margin-bottom:16px">How to start:</div>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        Add your API key to <code>.env</code> file:<br>
+        <code>ANTHROPIC_API_KEY=sk-ant-...</code><br>
+        Get it at: console.anthropic.com
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        Double-click <code>start.py</code> or run in terminal:<br>
+        <code>python start.py</code>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        Browser opens automatically at:<br>
+        <code>http://localhost:8000/app</code>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-text">
+        Type any psychology/neuroscience topic, click <strong>Start Research</strong>, and watch the AI work!
+      </div>
+    </div>
+  </div>
+
+  <a class="btn" href="http://localhost:8000/app">🚀 Open Live Dashboard</a>
+</div>
+</body>
+</html>

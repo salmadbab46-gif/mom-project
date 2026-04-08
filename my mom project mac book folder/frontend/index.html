@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PsychNeuro Research Bot</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --surface2: #22263a;
+    --accent: #7c6af7;
+    --accent2: #5eead4;
+    --accent3: #f97316;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --border: #2d3252;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --card-hover: #252a40;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e3a5f 100%);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(124,106,247,0.3);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    font-size: 32px;
+    filter: drop-shadow(0 0 8px rgba(124,106,247,0.8));
+  }
+  .logo-text h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #a78bfa, #38bdf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .logo-text p {
+    font-size: 0.75rem;
+    color: #94a3b8;
+  }
+  .header-stats {
+    display: flex;
+    gap: 24px;
+  }
+  .stat-badge {
+    text-align: center;
+  }
+  .stat-badge .num {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+  .stat-badge .lbl {
+    font-size: 0.7rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* LAYOUT */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 0;
+    min-height: calc(100vh - 80px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+    position: sticky;
+    top: 0;
+  }
+  .sidebar-section {
+    background: var(--surface2);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border);
+  }
+  .sidebar-section h3 {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    margin-bottom: 12px;
+  }
+  .input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  #subject-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  #subject-input:focus { border-color: var(--accent); }
+  .btn-add {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 14px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: opacity 0.2s;
+  }
+  .btn-add:hover { opacity: 0.85; }
+  .tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 32px;
+  }
+  .tag {
+    background: rgba(124,106,247,0.2);
+    border: 1px solid rgba(124,106,247,0.4);
+    color: #a78bfa;
+    border-radius: 20px;
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    animation: tagIn 0.2s ease;
+  }
+  @keyframes tagIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .tag-remove {
+    cursor: pointer;
+    opacity: 0.6;
+    font-size: 0.9rem;
+    line-height: 1;
+  }
+  .tag-remove:hover { opacity: 1; color: #ef4444; }
+
+  .preset-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 8px;
+  }
+  .preset-tag {
+    background: rgba(94,234,212,0.1);
+    border: 1px solid rgba(94,234,212,0.25);
+    color: var(--accent2);
+    border-radius: 12px;
+    padding: 3px 8px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .preset-tag:hover {
+    background: rgba(94,234,212,0.2);
+    transform: translateY(-1px);
+  }
+
+  .settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .settings-row label {
+    font-size: 0.82rem;
+    color: var(--text2);
+  }
+  .settings-row select,
+  .settings-row input[type="number"] {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: var(--text);
+    font-size: 0.82rem;
+    width: 90px;
+    outline: none;
+  }
+
+  #start-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #6d28d9, #4f46e5);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(109,40,217,0.4);
+  }
+  #start-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(109,40,217,0.5);
+  }
+  #start-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  #start-btn.running {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    box-shadow: 0 4px 16px rgba(220,38,38,0.4);
+  }
+
+  /* PROGRESS */
+  .progress-section {
+    display: none;
+  }
+  .progress-section.active { display: block; }
+  .progress-bar-wrap {
+    background: var(--bg);
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    box-shadow: 0 0 8px rgba(124,106,247,0.6);
+  }
+  .progress-msg {
+    font-size: 0.78rem;
+    color: var(--text3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .step-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--text3);
+    padding: 4px 0;
+  }
+  .step.done { color: var(--green); }
+  .step.active { color: var(--accent2); font-weight: 600; }
+  .step-icon { width: 16px; text-align: center; font-size: 0.8rem; }
+
+  /* FILTER */
+  .filter-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .filter-row label { font-size: 0.78rem; color: var(--text3); }
+  .filter-btn-group {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .filter-btn {
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text2);
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: rgba(124,106,247,0.2);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* HISTORY */
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 180px;
+    overflow-y: auto;
+  }
+  .history-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    font-size: 0.78rem;
+  }
+  .history-item:hover { border-color: var(--accent); }
+  .history-item .h-subjects { color: var(--text2); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .history-item .h-meta { color: var(--text3); font-size: 0.7rem; margin-top: 2px; }
+
+  /* MAIN CONTENT */
+  .content {
+    padding: 24px;
+    overflow-y: auto;
+    max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-height: 400px;
+    text-align: center;
+    gap: 16px;
+    color: var(--text3);
+  }
+  .empty-icon {
+    font-size: 64px;
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+  .empty-state h2 { font-size: 1.3rem; color: var(--text2); }
+  .empty-state p { font-size: 0.9rem; max-width: 400px; }
+
+  /* OVERVIEW CARD */
+  .overview-card {
+    background: linear-gradient(135deg, rgba(30,27,75,0.8), rgba(30,58,95,0.8));
+    border: 1px solid rgba(124,106,247,0.3);
+    border-radius: 16px;
+    padding: 20px 24px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+  .overview-card h2 {
+    font-size: 1rem;
+    color: var(--accent2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .overview-text {
+    color: var(--text2);
+    font-size: 0.9rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+
+  /* CHARTS ROW */
+  .charts-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .chart-card h3 {
+    font-size: 0.78rem;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 12px;
+  }
+  .chart-wrap {
+    position: relative;
+    height: 140px;
+  }
+
+  /* ARTICLE GRID */
+  .articles-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .articles-header h2 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .count-badge {
+    background: rgba(124,106,247,0.2);
+    color: var(--accent);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .search-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    color: var(--text);
+    font-size: 0.85rem;
+    outline: none;
+    width: 220px;
+    transition: border-color 0.2s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+
+  .articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+  }
+
+  /* ARTICLE CARD */
+  .article-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    animation: cardIn 0.3s ease;
+  }
+  @keyframes cardIn {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .article-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .article-card:hover {
+    background: var(--card-hover);
+    border-color: rgba(124,106,247,0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .article-card:hover::before { opacity: 1; }
+  .article-card.expanded { background: var(--card-hover); border-color: rgba(124,106,247,0.4); }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .card-badges {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .source-badge {
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .source-badge.academic { background: rgba(124,106,247,0.2); color: #a78bfa; }
+  .source-badge.peer-reviewed { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .reliability-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .rel-dots {
+    display: flex;
+    gap: 2px;
+  }
+  .rel-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .rel-dot.filled { background: var(--green); }
+  .rel-label {
+    font-size: 0.65rem;
+    color: var(--text3);
+  }
+
+  .article-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+  .article-meta {
+    font-size: 0.75rem;
+    color: var(--text3);
+    margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .article-meta span { display: flex; align-items: center; gap: 3px; }
+
+  .article-summary {
+    font-size: 0.83rem;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .key-points {
+    display: none;
+    margin: 10px 0;
+  }
+  .article-card.expanded .key-points { display: block; }
+  .key-points h4 {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text3);
+    margin-bottom: 6px;
+  }
+  .kp-item {
+    display: flex;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: var(--text2);
+    margin-bottom: 5px;
+    line-height: 1.4;
+  }
+  .kp-dot { color: var(--accent2); flex-shrink: 0; margin-top: 1px; }
+
+  .implications-box {
+    display: none;
+    background: rgba(94,234,212,0.06);
+    border: 1px solid rgba(94,234,212,0.15);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    color: var(--accent2);
+    margin-bottom: 10px;
+  }
+  .article-card.expanded .implications-box { display: block; }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .subject-tags {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .subj-tag {
+    background: rgba(249,115,22,0.12);
+    border: 1px solid rgba(249,115,22,0.2);
+    color: #fb923c;
+    border-radius: 10px;
+    padding: 2px 7px;
+    font-size: 0.68rem;
+  }
+  .card-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .btn-link {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: var(--text3);
+    font-size: 0.73rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .btn-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .expand-btn {
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 2px 6px;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .expand-btn:hover { color: var(--accent); }
+
+  .difficulty-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 8px;
+  }
+  .difficulty-badge.beginner { background: rgba(34,197,94,0.15); color: #4ade80; }
+  .difficulty-badge.intermediate { background: rgba(234,179,8,0.15); color: #fbbf24; }
+  .difficulty-badge.advanced { background: rgba(239,68,68,0.15); color: #f87171; }
+
+  /* LOADING SPINNER */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* PULSE */
+  .pulse-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.5s infinite;
+    margin-right: 4px;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  /* TOAST */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 0.85rem;
+    color: var(--text);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    z-index: 100;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s;
+    max-width: 320px;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 900px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .sidebar { max-height: none; position: static; }
+    .charts-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-icon">🧠</span>
+    <div class="logo-text">
+      <h1>PsychNeuro Research Bot</h1>
+      <p>AI-powered psychology & neuroscience research assistant</p>
+    </div>
+  </div>
+  <div class="header-stats">
+    <div class="stat-badge">
+      <div class="num" id="stat-total">0</div>
+      <div class="lbl">Articles</div>
+    </div>
+    <div class="stat-badge">
+      <div class="num" id="stat-sessions">0</div>
+      <div class="lbl">Sessions</div>
+    </div>
+    <div class="stat-badge">
+      <div class="num" id="stat-sources">3</div>
+      <div class="lbl">Sources</div>
+    </div>
+  </div>
+</header>
+
+<div class="main-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+
+    <!-- Search input -->
+    <div class="sidebar-section">
+      <h3>🔍 Research Topics</h3>
+      <div class="input-group">
+        <input id="subject-input" type="text" placeholder="e.g. neuroplasticity, anxiety..."
+               autocomplete="off" />
+        <button class="btn-add" onclick="addTag()">+</button>
+      </div>
+      <div class="tags-container" id="tags-container">
+        <span style="color:var(--text3);font-size:0.78rem">Add topics above ↑</span>
+      </div>
+      <div class="preset-tags" id="preset-tags">
+        <span style="color:var(--text3);font-size:0.72rem;width:100%;margin-bottom:4px">Quick add:</span>
+        <span class="preset-tag" onclick="addPreset('neuroplasticity')">neuroplasticity</span>
+        <span class="preset-tag" onclick="addPreset('memory consolidation')">memory</span>
+        <span class="preset-tag" onclick="addPreset('anxiety disorders')">anxiety</span>
+        <span class="preset-tag" onclick="addPreset('dopamine reward')">dopamine</span>
+        <span class="preset-tag" onclick="addPreset('cognitive bias')">cognitive bias</span>
+        <span class="preset-tag" onclick="addPreset('sleep brain')">sleep & brain</span>
+        <span class="preset-tag" onclick="addPreset('trauma PTSD')">trauma/PTSD</span>
+        <span class="preset-tag" onclick="addPreset('meditation mindfulness neuroscience')">mindfulness</span>
+        <span class="preset-tag" onclick="addPreset('depression neurobiology')">depression</span>
+        <span class="preset-tag" onclick="addPreset('consciousness perception')">consciousness</span>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="sidebar-section">
+      <h3>⚙️ Settings</h3>
+      <div class="settings-row">
+        <label>Articles per source</label>
+        <input type="number" id="max-per-source" value="6" min="2" max="15" />
+      </div>
+      <div class="settings-row">
+        <label>Sort by</label>
+        <select id="sort-select" onchange="sortArticles()">
+          <option value="reliability">Reliability</option>
+          <option value="year">Year (new)</option>
+          <option value="title">Title A-Z</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Start button -->
+    <button id="start-btn" onclick="startResearch()">
+      <span id="btn-icon">🚀</span>
+      <span id="btn-text">Start Research</span>
+    </button>
+
+    <!-- Progress -->
+    <div class="sidebar-section progress-section" id="progress-section">
+      <h3><span class="pulse-dot"></span> Live Progress</h3>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+      </div>
+      <div class="progress-msg" id="progress-msg">Initializing...</div>
+      <div class="step-list" id="step-list"></div>
+    </div>
+
+    <!-- Filter -->
+    <div class="sidebar-section" id="filter-section" style="display:none">
+      <h3>🔬 Filter Articles</h3>
+      <div class="filter-row">
+        <label>Source type</label>
+        <div class="filter-btn-group">
+          <button class="filter-btn active" onclick="filterBy('all',this)">All</button>
+          <button class="filter-btn" onclick="filterBy('academic',this)">Academic</button>
+          <button class="filter-btn" onclick="filterBy('peer-reviewed',this)">Peer Reviewed</button>
+        </div>
+      </div>
+      <div class="filter-row" style="margin-top:10px">
+        <label>Difficulty</label>
+        <div class="filter-btn-group">
+          <button class="filter-btn active" onclick="filterDiff('all',this)">All</button>
+          <button class="filter-btn" onclick="filterDiff('beginner',this)">Beginner</button>
+          <button class="filter-btn" onclick="filterDiff('intermediate',this)">Intermediate</button>
+          <button class="filter-btn" onclick="filterDiff('advanced',this)">Advanced</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="sidebar-section" id="history-section">
+      <h3>📚 Previous Sessions</h3>
+      <div class="history-list" id="history-list">
+        <span style="color:var(--text3);font-size:0.78rem">No history yet</span>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content" id="main-content">
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">🧬</div>
+      <h2>Your Research Dashboard</h2>
+      <p>Add topics on the left and click <strong>Start Research</strong> to discover peer-reviewed articles in psychology and neuroscience, summarized by AI.</p>
+      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;justify-content:center">
+        <span style="background:rgba(124,106,247,0.1);border:1px solid rgba(124,106,247,0.2);border-radius:8px;padding:6px 12px;font-size:0.8rem;color:var(--text2)">🔬 Semantic Scholar</span>
+        <span style="background:rgba(94,234,212,0.1);border:1px solid rgba(94,234,212,0.2);border-radius:8px;padding:6px 12px;font-size:0.8rem;color:var(--text2)">🏥 PubMed / NIH</span>
+        <span style="background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);border-radius:8px;padding:6px 12px;font-size:0.8rem;color:var(--text2)">📄 CrossRef</span>
+      </div>
+    </div>
+
+    <!-- Overview -->
+    <div class="overview-card" id="overview-card" style="display:none">
+      <h2>✨ Research Overview</h2>
+      <div class="overview-text" id="overview-text"></div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row" id="charts-row" style="display:none">
+      <div class="chart-card">
+        <h3>📊 Source Distribution</h3>
+        <div class="chart-wrap"><canvas id="sourceChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>📅 Publication Years</h3>
+        <div class="chart-wrap"><canvas id="yearChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>⭐ Reliability Scores</h3>
+        <div class="chart-wrap"><canvas id="reliabilityChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Articles -->
+    <div id="articles-section" style="display:none">
+      <div class="articles-header">
+        <h2>
+          📄 Articles
+          <span class="count-badge" id="article-count">0</span>
+        </h2>
+        <input class="search-input" type="text" id="search-articles"
+               placeholder="🔍 Search articles..."
+               oninput="searchArticles()" />
+      </div>
+      <div class="articles-grid" id="articles-grid"></div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let tags = [];
+let articles = [];
+let filteredArticles = [];
+let ws = null;
+let isRunning = false;
+let sourceFilter = 'all';
+let diffFilter = 'all';
+let charts = {};
+
+const WS_URL = 'ws://localhost:8000/ws/research';
+const API_URL = 'http://localhost:8000';
+
+// ============================================================
+// TAGS
+// ============================================================
+function addTag() {
+  const inp = document.getElementById('subject-input');
+  const val = inp.value.trim();
+  if (val && !tags.includes(val)) {
+    tags.push(val);
+    renderTags();
+    inp.value = '';
+  }
+}
+
+function addPreset(val) {
+  if (!tags.includes(val)) {
+    tags.push(val);
+    renderTags();
+    toast(`Added: ${val}`);
+  }
+}
+
+function removeTag(idx) {
+  tags.splice(idx, 1);
+  renderTags();
+}
+
+function renderTags() {
+  const c = document.getElementById('tags-container');
+  if (tags.length === 0) {
+    c.innerHTML = '<span style="color:var(--text3);font-size:0.78rem">Add topics above ↑</span>';
+    return;
+  }
+  c.innerHTML = tags.map((t, i) =>
+    `<span class="tag">${t}<span class="tag-remove" onclick="removeTag(${i})">×</span></span>`
+  ).join('');
+}
+
+document.getElementById('subject-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTag();
+});
+
+// ============================================================
+// RESEARCH
+// ============================================================
+function startResearch() {
+  if (isRunning) {
+    stopResearch();
+    return;
+  }
+  if (tags.length === 0) {
+    toast('Please add at least one topic!', 'warn');
+    return;
+  }
+
+  isRunning = true;
+  articles = [];
+  filteredArticles = [];
+
+  const btn = document.getElementById('start-btn');
+  btn.classList.add('running');
+  document.getElementById('btn-icon').textContent = '⏹';
+  document.getElementById('btn-text').textContent = 'Stop Research';
+  btn.disabled = false;
+
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('overview-card').style.display = 'none';
+  document.getElementById('charts-row').style.display = 'none';
+  document.getElementById('articles-section').style.display = 'none';
+  document.getElementById('articles-grid').innerHTML = '';
+  document.getElementById('progress-section').classList.add('active');
+  document.getElementById('filter-section').style.display = 'none';
+  setProgress(0, 'Connecting to research sources...');
+  updateSteps([]);
+
+  const maxPerSource = parseInt(document.getElementById('max-per-source').value) || 6;
+
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ subjects: tags, max_per_source: maxPerSource }));
+    addStep('connect', '✅', 'Connected to research engine', 'done');
+  };
+
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    handleMessage(msg);
+  };
+
+  ws.onerror = () => {
+    toast('Connection error. Is the backend running? Run start.py first.', 'error');
+    stopResearch();
+  };
+
+  ws.onclose = () => {
+    if (isRunning) {
+      isRunning = false;
+      resetBtn();
+    }
+  };
+}
+
+function stopResearch() {
+  if (ws) ws.close();
+  isRunning = false;
+  resetBtn();
+  document.getElementById('progress-section').classList.remove('active');
+}
+
+function resetBtn() {
+  const btn = document.getElementById('start-btn');
+  btn.classList.remove('running');
+  btn.disabled = false;
+  document.getElementById('btn-icon').textContent = '🚀';
+  document.getElementById('btn-text').textContent = 'Start Research';
+}
+
+let stepMap = {};
+function addStep(id, icon, text, status) {
+  const list = document.getElementById('step-list');
+  const existing = list.querySelector(`[data-id="${id}"]`);
+  if (existing) {
+    existing.className = `step ${status}`;
+    existing.querySelector('.step-icon').textContent = icon;
+    existing.querySelector('.step-text').textContent = text;
+    return;
+  }
+  const el = document.createElement('div');
+  el.className = `step ${status}`;
+  el.dataset.id = id;
+  el.innerHTML = `<span class="step-icon">${icon}</span><span class="step-text">${text}</span>`;
+  list.appendChild(el);
+}
+
+function updateSteps(msgs) {
+  document.getElementById('step-list').innerHTML = '';
+}
+
+let totalToSummarize = 0;
+let summarizedCount = 0;
+
+function handleMessage(msg) {
+  switch (msg.type) {
+    case 'session_start':
+      addStep('search', '⏳', `Searching: ${msg.subjects.join(', ')}`, 'active');
+      setProgress(5, `Starting research on ${msg.subjects.length} topic(s)...`);
+      break;
+
+    case 'status':
+      setProgress(null, msg.message);
+      break;
+
+    case 'progress':
+      setProgress(null, `${msg.message}`);
+      addStep(`src_${msg.source}`, '✅', `${msg.source}: ${msg.count} papers found`, 'done');
+      break;
+
+    case 'search_complete':
+      totalToSummarize = msg.total_found;
+      addStep('search', '✅', `Found ${msg.total_found} unique articles`, 'done');
+      addStep('summarize', '⏳', 'Summarizing with Claude AI...', 'active');
+      setProgress(20, msg.message);
+      document.getElementById('articles-section').style.display = 'block';
+      break;
+
+    case 'summarizing':
+      const pct = 20 + (msg.current / msg.total) * 70;
+      setProgress(pct, msg.message);
+      break;
+
+    case 'article':
+      articles.push(msg.article);
+      renderArticleCard(msg.article, msg.index);
+      document.getElementById('article-count').textContent = articles.length;
+      document.getElementById('stat-total').textContent = articles.length;
+      break;
+
+    case 'complete':
+      isRunning = false;
+      resetBtn();
+      setProgress(100, '✅ Research complete!');
+      addStep('summarize', '✅', 'Summarization complete', 'done');
+      addStep('overview', '✅', 'Overview generated', 'done');
+
+      if (msg.report_path) {
+        addStep('saved', '💾', `Report saved: ${msg.report_path.split(/[\\/]/).pop()}`, 'done');
+      }
+
+      if (msg.overview) {
+        document.getElementById('overview-text').textContent = msg.overview;
+        document.getElementById('overview-card').style.display = 'block';
+      }
+
+      filteredArticles = [...articles];
+      document.getElementById('charts-row').style.display = 'grid';
+      document.getElementById('filter-section').style.display = 'block';
+      renderCharts();
+      loadHistory();
+
+      const savedMsg = msg.report_path
+        ? `Done! Report saved to: reports/${msg.report_path.split(/[\\/]/).pop()}`
+        : `Research complete! Found ${articles.length} articles.`;
+      toast(savedMsg, 'success');
+
+      setTimeout(() => {
+        document.getElementById('progress-section').classList.remove('active');
+      }, 5000);
+      break;
+
+    case 'error':
+      toast(`Error: ${msg.message}`, 'error');
+      stopResearch();
+      break;
+  }
+}
+
+function setProgress(pct, msg) {
+  if (pct !== null) {
+    document.getElementById('progress-bar').style.width = pct + '%';
+  }
+  if (msg) {
+    document.getElementById('progress-msg').textContent = msg;
+  }
+}
+
+// ============================================================
+// ARTICLE RENDERING
+// ============================================================
+function renderArticleCard(article, idx) {
+  const grid = document.getElementById('articles-grid');
+  const id = `card-${idx}`;
+
+  const relScore = article.reliability_score || 0;
+  const relDots = Array(5).fill(0).map((_, i) =>
+    `<span class="rel-dot ${i < Math.round(relScore * 5) ? 'filled' : ''}"></span>`
+  ).join('');
+
+  const sourceType = article.source_type || 'academic';
+  const year = article.year || 'N/A';
+  const authors = (article.authors || []).slice(0, 2).join(', ') || 'Unknown authors';
+  const summary = article.summary || article.abstract?.substring(0, 200) || 'No summary available.';
+  const keyPoints = article.key_points || [];
+  const difficulty = article.difficulty || 'intermediate';
+  const subjects = article.subjects || [];
+  const implications = article.implications || '';
+  const source = article.source || '';
+  const sourceUrl = article.source_url || '#';
+
+  const card = document.createElement('div');
+  card.className = 'article-card';
+  card.id = id;
+  card.dataset.sourceType = sourceType;
+  card.dataset.difficulty = difficulty;
+  card.dataset.title = (article.title || '').toLowerCase();
+  card.dataset.text = summary.toLowerCase();
+
+  card.innerHTML = `
+    <div class="card-top">
+      <div style="flex:1">
+        <div class="article-title">${escHtml(article.title || 'Untitled')}</div>
+      </div>
+      <div class="card-badges">
+        <span class="source-badge ${sourceType}">${sourceType === 'peer-reviewed' ? '✓ Peer Reviewed' : '📚 Academic'}</span>
+        <div class="reliability-bar">
+          <div class="rel-dots">${relDots}</div>
+          <span class="rel-label">${Math.round(relScore * 100)}%</span>
+        </div>
+      </div>
+    </div>
+    <div class="article-meta">
+      <span>👥 ${escHtml(authors)}</span>
+      <span>📅 ${year}</span>
+      <span>🔗 ${escHtml(source.split('—')[0].trim())}</span>
+      <span class="difficulty-badge ${difficulty}">${difficulty}</span>
+    </div>
+    <div class="article-summary">${escHtml(summary)}</div>
+    <div class="key-points">
+      <h4>Key Points</h4>
+      ${keyPoints.map(kp => `
+        <div class="kp-item">
+          <span class="kp-dot">▸</span>
+          <span>${escHtml(kp)}</span>
+        </div>
+      `).join('')}
+    </div>
+    ${implications ? `<div class="implications-box">💡 ${escHtml(implications)}</div>` : ''}
+    <div class="card-footer">
+      <div class="subject-tags">
+        ${subjects.map(s => `<span class="subj-tag">${escHtml(s)}</span>`).join('')}
+      </div>
+      <div class="card-actions">
+        ${sourceUrl && sourceUrl !== '#' ? `<a class="btn-link" href="${escHtml(sourceUrl)}" target="_blank" rel="noopener">🔗 Source</a>` : ''}
+        <button class="expand-btn" onclick="toggleCard('${id}')">
+          <span id="expand-icon-${id}">▼ More</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  grid.appendChild(card);
+}
+
+function toggleCard(id) {
+  const card = document.getElementById(id);
+  const icon = document.getElementById(`expand-icon-${id}`);
+  if (card.classList.contains('expanded')) {
+    card.classList.remove('expanded');
+    icon.textContent = '▼ More';
+  } else {
+    card.classList.add('expanded');
+    icon.textContent = '▲ Less';
+  }
+}
+
+// ============================================================
+// CHARTS
+// ============================================================
+function renderCharts() {
+  // Source distribution
+  const sourceCount = {};
+  articles.forEach(a => {
+    const s = (a.source || '').split('—')[0].trim();
+    sourceCount[s] = (sourceCount[s] || 0) + 1;
+  });
+
+  if (charts.source) charts.source.destroy();
+  charts.source = new Chart(document.getElementById('sourceChart'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(sourceCount),
+      datasets: [{
+        data: Object.values(sourceCount),
+        backgroundColor: ['#7c6af7','#5eead4','#f97316','#22c55e','#38bdf8'],
+        borderWidth: 0,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: { color: '#94a3b8', font: { size: 10 }, padding: 8, boxWidth: 12 }
+        }
+      }
+    }
+  });
+
+  // Publication years
+  const yearCount = {};
+  articles.forEach(a => {
+    if (a.year && a.year > 1990) {
+      yearCount[a.year] = (yearCount[a.year] || 0) + 1;
+    }
+  });
+  const sortedYears = Object.keys(yearCount).sort().slice(-12);
+
+  if (charts.year) charts.year.destroy();
+  charts.year = new Chart(document.getElementById('yearChart'), {
+    type: 'bar',
+    data: {
+      labels: sortedYears,
+      datasets: [{
+        data: sortedYears.map(y => yearCount[y] || 0),
+        backgroundColor: 'rgba(94,234,212,0.6)',
+        borderColor: '#5eead4',
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+
+  // Reliability distribution
+  const relBuckets = { '0-60%': 0, '60-75%': 0, '75-90%': 0, '90-100%': 0 };
+  articles.forEach(a => {
+    const r = (a.reliability_score || 0) * 100;
+    if (r < 60) relBuckets['0-60%']++;
+    else if (r < 75) relBuckets['60-75%']++;
+    else if (r < 90) relBuckets['75-90%']++;
+    else relBuckets['90-100%']++;
+  });
+
+  if (charts.rel) charts.rel.destroy();
+  charts.rel = new Chart(document.getElementById('reliabilityChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(relBuckets),
+      datasets: [{
+        data: Object.values(relBuckets),
+        backgroundColor: ['rgba(239,68,68,0.6)','rgba(234,179,8,0.6)','rgba(124,106,247,0.6)','rgba(34,197,94,0.6)'],
+        borderWidth: 0,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.03)' } },
+        y: { ticks: { color: '#64748b', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+// ============================================================
+// FILTER & SEARCH
+// ============================================================
+function filterBy(type, btn) {
+  sourceFilter = type;
+  document.querySelectorAll('.filter-btn-group').forEach(g => {
+    if (g.contains(btn)) {
+      g.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+  });
+  applyFilters();
+}
+
+function filterDiff(diff, btn) {
+  diffFilter = diff;
+  document.querySelectorAll('.filter-btn-group')[1]?.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function searchArticles() {
+  applyFilters();
+}
+
+function applyFilters() {
+  const searchTerm = document.getElementById('search-articles').value.toLowerCase().trim();
+  const cards = document.querySelectorAll('.article-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const matchSource = sourceFilter === 'all' || card.dataset.sourceType === sourceFilter;
+    const matchDiff = diffFilter === 'all' || card.dataset.difficulty === diffFilter;
+    const matchSearch = !searchTerm ||
+      card.dataset.title.includes(searchTerm) ||
+      card.dataset.text.includes(searchTerm);
+    card.style.display = (matchSource && matchDiff && matchSearch) ? '' : 'none';
+    if (matchSource && matchDiff && matchSearch) visible++;
+  });
+  document.getElementById('article-count').textContent = visible;
+}
+
+function sortArticles() {
+  const by = document.getElementById('sort-select').value;
+  const grid = document.getElementById('articles-grid');
+  const cards = Array.from(grid.querySelectorAll('.article-card'));
+  const articlesMap = {};
+  articles.forEach((a, i) => { articlesMap[`card-${i}`] = a; });
+
+  cards.sort((a, b) => {
+    const aa = articlesMap[a.id];
+    const bb = articlesMap[b.id];
+    if (!aa || !bb) return 0;
+    if (by === 'reliability') return (bb.reliability_score || 0) - (aa.reliability_score || 0);
+    if (by === 'year') return (bb.year || 0) - (aa.year || 0);
+    if (by === 'title') return (aa.title || '').localeCompare(bb.title || '');
+    return 0;
+  });
+  cards.forEach(c => grid.appendChild(c));
+}
+
+// ============================================================
+// HISTORY
+// ============================================================
+async function loadHistory() {
+  try {
+    const resp = await fetch(`${API_URL}/api/sessions`);
+    const sessions = await resp.json();
+    document.getElementById('stat-sessions').textContent = sessions.length;
+    const list = document.getElementById('history-list');
+    if (!sessions.length) {
+      list.innerHTML = '<span style="color:var(--text3);font-size:0.78rem">No history yet</span>';
+      return;
+    }
+    list.innerHTML = sessions.map(s => {
+      const subjects = JSON.parse(s.subjects || '[]');
+      const date = new Date(s.created_at).toLocaleDateString();
+      return `
+        <div class="history-item" onclick="loadSession('${s.id}')">
+          <div class="h-subjects">${subjects.join(', ')}</div>
+          <div class="h-meta">${date} · ${s.total_articles || 0} articles</div>
+        </div>
+      `;
+    }).join('');
+  } catch (e) {}
+}
+
+async function loadSession(sessionId) {
+  try {
+    const resp = await fetch(`${API_URL}/api/sessions/${sessionId}/articles`);
+    const data = await resp.json();
+    if (!data.length) { toast('No articles in this session'); return; }
+
+    articles = data;
+    document.getElementById('empty-state').style.display = 'none';
+    document.getElementById('articles-section').style.display = 'block';
+    document.getElementById('filter-section').style.display = 'block';
+    document.getElementById('charts-row').style.display = 'grid';
+    document.getElementById('articles-grid').innerHTML = '';
+
+    articles.forEach((a, i) => renderArticleCard(a, i));
+    document.getElementById('article-count').textContent = articles.length;
+    document.getElementById('stat-total').textContent = articles.length;
+    renderCharts();
+    toast(`Loaded session: ${articles.length} articles`);
+  } catch (e) {
+    toast('Failed to load session', 'error');
+  }
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function escHtml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+let toastTimer;
+function toast(msg, type='info') {
+  const el = document.getElementById('toast');
+  const icons = { info:'ℹ️', success:'✅', warn:'⚠️', error:'❌' };
+  el.textContent = `${icons[type] || ''} ${msg}`;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3500);
+}
+
+// Init
+loadHistory();
+
+// Auto-start if subjects passed via URL ?subjects=[...]
+(function() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const s = params.get('subjects');
+    if (s) {
+      const parsed = JSON.parse(decodeURIComponent(s));
+      if (Array.isArray(parsed) && parsed.length) {
+        tags = parsed;
+        renderTags();
+        setTimeout(startResearch, 800);
+      }
+    }
+  } catch(e) {}
+})();
+</script>
+</body>
+</html>
