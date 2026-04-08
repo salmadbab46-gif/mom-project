@@ -1,0 +1,3 @@
+zahra@MacBook-Air-de-BOUCHKIOUA ~ % [200~pip3 install fastapi uvicorn requests python-dotenv beautifulsoup4 lxml websockets~
+zsh: bad pattern: [200~pip3
+zahra@MacBook-Air-de-BOUCHKIOUA ~ % 
